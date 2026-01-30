@@ -1,0 +1,5 @@
+node_modules/
+dist/
+.headlamp-plugin/
+*.log
+.DS_Store
