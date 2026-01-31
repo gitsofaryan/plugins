@@ -1,60 +1,49 @@
-import { KubeObject, KubeObjectInterface } from '@kinvolk/headlamp-plugin/lib/k8s/cluster';
+import { KubeObject } from '@kinvolk/headlamp-plugin/lib/K8s/cluster';
 
 export interface KafkaConnectorSpec {
-  class: string;
-  tasksMax?: number;
-  config?: Record<string, any>;
-  pause?: boolean;
+    class: string;
+    tasksMax: number;
+    config: { [key: string]: any };
+    pause?: boolean;
 }
 
 export interface KafkaConnectorStatus {
-  conditions?: Array<{
-    type: string;
-    status: string;
-    reason?: string;
-    message?: string;
-    lastTransitionTime?: string;
-  }>;
-  observedGeneration?: number;
-  connectorStatus?: {
-    name: string;
-    connector: {
-      state: string;
-      worker_id: string;
+    conditions?: {
+        type: string;
+        status: string;
+        lastTransitionTime?: string;
+        reason?: string;
+        message?: string;
+    }[];
+    connectorStatus?: {
+        connector: {
+            state: string;
+            worker_id: string;
+        };
+        name: string;
+        tasks: {
+            id: number;
+            state: string;
+            worker_id: string;
+        }[];
+        type: string;
     };
-    tasks: Array<{
-      id: number;
-      state: string;
-      worker_id: string;
-    }>;
-    type: string;
-  };
 }
 
-export interface KafkaConnectorInterface extends KubeObjectInterface {
-  spec: KafkaConnectorSpec;
-  status?: KafkaConnectorStatus;
-}
+export default class KafkaConnector extends KubeObject {
+    static kind = 'KafkaConnector';
+    static apiName = 'kafkaconnectors';
+    static apiVersion = 'kafka.strimzi.io/v1beta2';
+    static isNamespaced = true;
 
-export class KafkaConnector extends KubeObject<KafkaConnectorInterface> {
-  static apiVersion = 'kafka.strimzi.io/v1beta2';
-  static kind = 'KafkaConnector';
-  static apiName = 'kafkaconnectors';
-  static isNamespaced = true;
+    spec: KafkaConnectorSpec;
+    status: KafkaConnectorStatus;
 
-  get spec() {
-    return this.jsonData.spec;
-  }
+    static get listRoute() {
+        return 'strimzi/connect/connectors';
+    }
 
-  get status() {
-    return this.jsonData.status || {};
-  }
-
-  get state(): string {
-    return this.status.connectorStatus?.connector?.state || 'Unknown';
-  }
-
-  get readyStatus(): string {
-    return this.status.conditions?.find(c => c.type === 'Ready')?.status || 'Unknown';
-  }
+    get listRoute() {
+        return 'strimzi/connect/connectors';
+    }
 }

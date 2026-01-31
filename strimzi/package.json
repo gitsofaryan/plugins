@@ -1,8 +1,8 @@
 {
     "name": "@headlamp-k8s/strimzi",
     "version": "0.1.0-alpha",
+    "main": "dist/main.js",
     "description": "Headlamp plugin for Strimzi Kafka",
-    "type": "module",
     "scripts": {
         "start": "headlamp-plugin start",
         "dev": "npm start",
@@ -11,7 +11,9 @@
         "lint": "headlamp-plugin lint",
         "lint-fix": "headlamp-plugin lint --fix",
         "package": "headlamp-plugin package",
-        "tsc": "headlamp-plugin tsc"
+        "tsc": "headlamp-plugin tsc",
+        "storybook": "headlamp-plugin storybook",
+        "storybook-build": "headlamp-plugin storybook-build"
     },
     "keywords": [
         "headlamp",
@@ -28,11 +30,11 @@
         ]
     },
     "devDependencies": {
-        "@kinvolk/headlamp-plugin": "^0.13.0-alpha.14"
+        "@kinvolk/headlamp-plugin": "^0.13.0",
+        "@rollup/plugin-inject": "^5.0.5",
+        "unenv": "^1.10.0"
     },
-    "dependencies": {
-        "react": "^18.3.1",
-        "react-dom": "^18.3.1",
-        "@iconify/react": "^4.1.1"
+    "overrides": {
+        "typescript": "5.6.2"
     }
 }

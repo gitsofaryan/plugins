@@ -1,35 +1,47 @@
-import { ResourceListView, StatusLabel } from '@kinvolk/headlamp-plugin/lib/components/common';
-import React from 'react';
-import { KafkaConnect } from '../../resources/kafkaConnect';
+import { ResourceListView } from '@kinvolk/headlamp-plugin/lib/CommonComponents';
+import { Button } from '@mui/material';
+import KafkaConnect from '../../resources/kafkaConnect';
+import { Link } from '@kinvolk/headlamp-plugin/lib/CommonComponents';
 import { StrimziInstallCheck } from '../common/CommonComponents';
 
 export function KafkaConnectList() {
     return (
         <StrimziInstallCheck>
             <ResourceListView
-                title="Kafka Connect"
+                title="Kafka Connect Clusters"
+                headerProps={{
+                    actions: [
+                        // Create button to be added later
+                    ],
+                }}
                 resourceClass={KafkaConnect}
                 columns={[
-                    'name',
-                    'namespace',
+                    {
+                        id: 'name',
+                        label: 'Name',
+                        getValue: (item: any) => item.metadata.name,
+                        render: (item: any) => <Link routeName="details" params={{ name: item.metadata.name, namespace: item.metadata.namespace }}>{item.metadata.name}</Link>,
+                    },
+                    {
+                        id: 'namespace',
+                        label: 'Namespace',
+                        getValue: (item: any) => item.metadata.namespace,
+                    },
                     {
                         id: 'replicas',
                         label: 'Replicas',
-                        getValue: (item: KafkaConnect) => item.replicas.toString(),
+                        getValue: (item: any) => item.spec.replicas,
                     },
                     {
-                        id: 'ready',
-                        label: 'Ready',
-                        render: (item: KafkaConnect) => {
-                            const status = item.readyStatus;
-                            return (
-                                <StatusLabel status={status === 'True' ? 'success' : status === 'False' ? 'error' : 'warning'}>
-                                    {status}
-                                </StatusLabel>
-                            );
-                        },
+                        id: 'version',
+                        label: 'Version',
+                        getValue: (item: any) => item.spec.version || 'N/A',
                     },
-                    'age',
+                    {
+                        id: 'created',
+                        label: 'Age',
+                        getValue: (item: any) => item.metadata.creationTimestamp,
+                    },
                 ]}
             />
         </StrimziInstallCheck>

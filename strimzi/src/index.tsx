@@ -5,19 +5,24 @@ import {
     registerSidebarEntry,
 } from '@kinvolk/headlamp-plugin/lib';
 import React from 'react';
+import { KafkaDetails } from './components/Kafka/Details';
 import { KafkaList } from './components/Kafka/List';
 import { KafkaConnectList } from './components/KafkaConnect/List';
+import { KafkaConnectDetails } from './components/KafkaConnect/Details';
 import { KafkaConnectorList } from './components/KafkaConnector/List';
+import { KafkaConnectorDetails } from './components/KafkaConnector/Details';
+import { KafkaTopicDetails } from './components/KafkaTopic/Details';
 import { KafkaTopicList } from './components/KafkaTopic/List';
 import { KafkaUserList } from './components/KafkaUser/List';
 
+console.log('Strimzi Plugin: Registering sidebar entries...');
 // Main Strimzi sidebar entry
 registerSidebarEntry({
     name: 'Strimzi',
     url: '/strimzi/clusters',
     icon: 'simple-icons:apachekafka',
-    parent: '',
-    label: 'Kafka',
+    parent: null,
+    label: 'Strimzi (Dev)',
 });
 
 // Sub-menu entries
@@ -72,10 +77,24 @@ registerRoute({
 });
 
 registerRoute({
+    path: '/strimzi/clusters/:namespace/:name',
+    sidebar: 'Kafka Clusters',
+    name: 'Kafka Cluster Details',
+    component: () => <KafkaDetails />,
+});
+
+registerRoute({
     path: '/strimzi/topics',
     sidebar: 'Kafka Topics',
     name: 'Kafka Topics',
     component: () => <KafkaTopicList />,
+});
+
+registerRoute({
+    path: '/strimzi/topics/:namespace/:name',
+    sidebar: 'Kafka Topics',
+    name: 'Kafka Topic Details',
+    component: () => <KafkaTopicDetails />,
 });
 
 registerRoute({
@@ -97,6 +116,20 @@ registerRoute({
     sidebar: 'Connectors',
     name: 'Kafka Connectors',
     component: () => <KafkaConnectorList />,
+});
+
+registerRoute({
+    path: '/strimzi/connect-clusters/:namespace/:name',
+    sidebar: 'Connect Clusters',
+    name: 'Kafka Connect Cluster Details',
+    component: () => <KafkaConnectDetails />,
+});
+
+registerRoute({
+    path: '/strimzi/connectors/:namespace/:name',
+    sidebar: 'Connectors',
+    name: 'Kafka Connector Details',
+    component: () => <KafkaConnectorDetails />,
 });
 
 // Register icons

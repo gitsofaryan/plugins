@@ -1,14 +1,15 @@
 import { KubeObject } from '@kinvolk/headlamp-plugin/lib/K8s/cluster';
 
-export interface KafkaConnectSpec {
+export interface KafkaBridgeSpec {
     replicas: number;
-    version?: string;
     image?: string;
     bootstrapServers: string;
-    config?: { [key: string]: any };
+    http: {
+        port: number;
+    };
 }
 
-export interface KafkaConnectStatus {
+export interface KafkaBridgeStatus {
     conditions?: {
         type: string;
         status: string;
@@ -21,20 +22,20 @@ export interface KafkaConnectStatus {
     labelSelector?: string;
 }
 
-export default class KafkaConnect extends KubeObject {
-    static kind = 'KafkaConnect';
-    static apiName = 'kafkaconnects';
+export default class KafkaBridge extends KubeObject {
+    static kind = 'KafkaBridge';
+    static apiName = 'kafkabridges';
     static apiVersion = 'kafka.strimzi.io/v1beta2';
     static isNamespaced = true;
 
-    spec: KafkaConnectSpec;
-    status: KafkaConnectStatus;
+    spec: KafkaBridgeSpec;
+    status: KafkaBridgeStatus;
 
     static get listRoute() {
-        return 'strimzi/connect/clusters';
+        return 'strimzi/bridges';
     }
 
     get listRoute() {
-        return 'strimzi/connect/clusters';
+        return 'strimzi/bridges';
     }
 }

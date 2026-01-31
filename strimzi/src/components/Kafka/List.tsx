@@ -1,4 +1,4 @@
-import { ResourceListView, StatusLabel } from '@kinvolk/headlamp-plugin/lib/components/common';
+import { Link, ResourceListView, StatusLabel } from '@kinvolk/headlamp-plugin/lib/components/common';
 import React from 'react';
 import { Kafka } from '../../resources/kafka';
 import { StrimziInstallCheck } from '../common/CommonComponents';
@@ -10,22 +10,35 @@ export function KafkaList() {
                 title="Kafka Clusters"
                 resourceClass={Kafka}
                 columns={[
-                    'name',
-                    'namespace',
+                    {
+                        id: 'name',
+                        label: 'Name',
+                        getValue: (item: any) => item.metadata.name,
+                        render: (item: any) => (
+                            <Link routeName="/strimzi/clusters/:namespace/:name" params={{ namespace: item.metadata.namespace, name: item.metadata.name }}>
+                                {item.metadata.name}
+                            </Link>
+                        ),
+                    },
+                    {
+                        id: 'namespace',
+                        label: 'Namespace',
+                        getValue: (item: any) => item.metadata.namespace,
+                    },
                     {
                         id: 'version',
                         label: 'Version',
-                        getValue: (item: Kafka) => item.kafkaVersion,
+                        getValue: (item: any) => item.kafkaVersion,
                     },
                     {
                         id: 'replicas',
                         label: 'Replicas',
-                        getValue: (item: Kafka) => item.replicas.toString(),
+                        getValue: (item: any) => item.replicas.toString(),
                     },
                     {
                         id: 'ready',
                         label: 'Ready',
-                        render: (item: Kafka) => {
+                        render: (item: any) => {
                             const status = item.readyStatus;
                             return (
                                 <StatusLabel status={status === 'True' ? 'success' : status === 'False' ? 'error' : 'warning'}>
