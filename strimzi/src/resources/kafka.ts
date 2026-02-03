@@ -56,11 +56,11 @@ export class Kafka extends KubeObject<KafkaInterface> {
   }
 
   get kafkaVersion(): string {
-    return this.status.kafkaVersion || this.spec.kafka.version || 'unknown';
+    return this.status.kafkaVersion || this.spec?.kafka?.version || 'unknown';
   }
 
   get replicas(): number {
-    return this.spec.kafka.replicas || 0;
+    return this.spec?.kafka?.replicas || 0;
   }
 
   get readyStatus(): string {

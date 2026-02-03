@@ -36,7 +36,7 @@ export function KafkaTopicDetails() {
                             id: 'strimzi-spec',
                             section: (
                                 <SectionBox title="Topic Configuration">
-                                    <pre>{JSON.stringify(item.spec.config, null, 2)}</pre>
+                                    <pre>{JSON.stringify(item.spec?.config || {}, null, 2)}</pre>
                                 </SectionBox>
                             ),
                         },

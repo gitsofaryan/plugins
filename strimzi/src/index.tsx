@@ -14,6 +14,15 @@ import { KafkaConnectorDetails } from './components/KafkaConnector/Details';
 import { KafkaTopicDetails } from './components/KafkaTopic/Details';
 import { KafkaTopicList } from './components/KafkaTopic/List';
 import { KafkaUserList } from './components/KafkaUser/List';
+import { KafkaUserDetails } from './components/KafkaUser/Details';
+import { KafkaBridgeList } from './components/KafkaBridge/List';
+import { KafkaBridgeDetails } from './components/KafkaBridge/Details';
+import { KafkaMirrorMaker2List } from './components/KafkaMirrorMaker2/List';
+import { KafkaMirrorMaker2Details } from './components/KafkaMirrorMaker2/Details';
+import { KafkaNodePoolList } from './components/KafkaNodePool/List';
+import { KafkaNodePoolDetails } from './components/KafkaNodePool/Details';
+import { KafkaRebalanceList } from './components/KafkaRebalance/List';
+import { KafkaRebalanceDetails } from './components/KafkaRebalance/Details';
 
 console.log('Strimzi Plugin: Registering sidebar entries...');
 // Main Strimzi sidebar entry
@@ -68,6 +77,34 @@ registerSidebarEntry({
     label: 'Connectors',
 });
 
+registerSidebarEntry({
+    name: 'Kafka Bridges',
+    url: '/strimzi/bridges',
+    parent: 'Strimzi',
+    label: 'Bridges',
+});
+
+registerSidebarEntry({
+    name: 'MirrorMaker 2',
+    url: '/strimzi/mirrormaker2',
+    parent: 'Strimzi',
+    label: 'MirrorMaker 2',
+});
+
+registerSidebarEntry({
+    name: 'Node Pools',
+    url: '/strimzi/nodepools',
+    parent: 'Strimzi',
+    label: 'Node Pools',
+});
+
+registerSidebarEntry({
+    name: 'Rebalances',
+    url: '/strimzi/rebalances',
+    parent: 'Strimzi',
+    label: 'Rebalances',
+});
+
 // Routes
 registerRoute({
     path: '/strimzi/clusters',
@@ -105,6 +142,13 @@ registerRoute({
 });
 
 registerRoute({
+    path: '/strimzi/users/:namespace/:name',
+    sidebar: 'Kafka Users',
+    name: 'Kafka User Details',
+    component: () => <KafkaUserDetails />,
+});
+
+registerRoute({
     path: '/strimzi/connect-clusters',
     sidebar: 'Connect Clusters',
     name: 'Connect Clusters',
@@ -119,6 +163,20 @@ registerRoute({
 });
 
 registerRoute({
+    path: '/strimzi/bridges',
+    sidebar: 'Kafka Bridges',
+    name: 'Kafka Bridges',
+    component: () => <KafkaBridgeList />,
+});
+
+registerRoute({
+    path: '/strimzi/bridges/:namespace/:name',
+    sidebar: 'Kafka Bridges',
+    name: 'Kafka Bridge Details',
+    component: () => <KafkaBridgeDetails />,
+});
+
+registerRoute({
     path: '/strimzi/connect-clusters/:namespace/:name',
     sidebar: 'Connect Clusters',
     name: 'Kafka Connect Cluster Details',
@@ -130,6 +188,48 @@ registerRoute({
     sidebar: 'Connectors',
     name: 'Kafka Connector Details',
     component: () => <KafkaConnectorDetails />,
+});
+
+registerRoute({
+    path: '/strimzi/mirrormaker2',
+    sidebar: 'MirrorMaker 2',
+    name: 'MirrorMaker 2',
+    component: () => <KafkaMirrorMaker2List />,
+});
+
+registerRoute({
+    path: '/strimzi/mirrormaker2/:namespace/:name',
+    sidebar: 'MirrorMaker 2',
+    name: 'MirrorMaker 2 Details',
+    component: () => <KafkaMirrorMaker2Details />,
+});
+
+registerRoute({
+    path: '/strimzi/nodepools',
+    sidebar: 'Node Pools',
+    name: 'Kafka Node Pools',
+    component: () => <KafkaNodePoolList />,
+});
+
+registerRoute({
+    path: '/strimzi/nodepools/:namespace/:name',
+    sidebar: 'Node Pools',
+    name: 'Kafka Node Pool Details',
+    component: () => <KafkaNodePoolDetails />,
+});
+
+registerRoute({
+    path: '/strimzi/rebalances',
+    sidebar: 'Rebalances',
+    name: 'Kafka Rebalances',
+    component: () => <KafkaRebalanceList />,
+});
+
+registerRoute({
+    path: '/strimzi/rebalances/:namespace/:name',
+    sidebar: 'Rebalances',
+    name: 'Kafka Rebalance Details',
+    component: () => <KafkaRebalanceDetails />,
 });
 
 // Register icons
@@ -156,4 +256,23 @@ registerKindIcon('KafkaConnect', {
 registerKindIcon('KafkaConnector', {
     icon: <Icon icon="mdi:link-variant" width="70%" height="70%" />,
     color: '#5d10ad',
+});
+
+registerKindIcon('KafkaBridge', {
+    icon: <Icon icon="mdi:bridge" width="70%" height="70%" />,
+    color: '#5d10ad',
+});
+
+registerKindIcon('KafkaMirrorMaker2', {
+    icon: <Icon icon="mdi:swap-horizontal" width="70%" height="70%" />,
+    color: '#5d10ad',
+});
+registerKindIcon('KafkaNodePool', {
+    icon: <Icon icon='mdi:server-network' width='70%' height='70%' />,
+    color: '#231F20',
+});
+
+registerKindIcon('KafkaRebalance', {
+    icon: <Icon icon='mdi:scale-balance' width='70%' height='70%' />,
+    color: '#e38200',
 });

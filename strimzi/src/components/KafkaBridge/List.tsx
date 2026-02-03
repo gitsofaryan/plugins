@@ -1,26 +1,27 @@
 import { ResourceListView } from '@kinvolk/headlamp-plugin/lib/CommonComponents';
-import { Button } from '@mui/material';
-import KafkaConnect from '../../resources/kafkaConnect';
+import KafkaBridge from '../../resources/kafkaBridge';
 import { Link } from '@kinvolk/headlamp-plugin/lib/CommonComponents';
 import { StrimziInstallCheck } from '../common/CommonComponents';
 
-export function KafkaConnectList() {
+export function KafkaBridgeList() {
     return (
         <StrimziInstallCheck>
             <ResourceListView
-                title="Kafka Connect Clusters"
-                headerProps={{
-                    actions: [
-                        // Create button to be added later
-                    ],
-                }}
-                resourceClass={KafkaConnect}
+                title="Kafka Bridges"
+                resourceClass={KafkaBridge}
                 columns={[
                     {
                         id: 'name',
                         label: 'Name',
                         getValue: (item: any) => item.metadata.name,
-                        render: (item: any) => <Link routeName="details" params={{ name: item.metadata.name, namespace: item.metadata.namespace }}>{item.metadata.name}</Link>,
+                        render: (item: any) => (
+                            <Link
+                                routeName="/strimzi/bridges/:namespace/:name"
+                                params={{ name: item.metadata.name, namespace: item.metadata.namespace }}
+                            >
+                                {item.metadata.name}
+                            </Link>
+                        ),
                     },
                     {
                         id: 'namespace',
@@ -33,9 +34,14 @@ export function KafkaConnectList() {
                         getValue: (item: any) => item.spec?.replicas || 0,
                     },
                     {
-                        id: 'version',
-                        label: 'Version',
-                        getValue: (item: any) => item.spec?.version || 'N/A',
+                        id: 'bootstrapServers',
+                        label: 'Bootstrap Servers',
+                        getValue: (item: any) => item.spec?.bootstrapServers || 'N/A',
+                    },
+                    {
+                        id: 'port',
+                        label: 'HTTP Port',
+                        getValue: (item: any) => item.spec?.http?.port || 'N/A',
                     },
                     {
                         id: 'created',

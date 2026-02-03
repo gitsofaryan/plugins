@@ -39,15 +39,15 @@ export class KafkaTopic extends KubeObject<KafkaTopicInterface> {
   }
 
   get topicName(): string {
-    return this.spec.topicName || this.metadata.name;
+    return this.spec?.topicName || this.metadata.name;
   }
 
   get partitions(): number {
-    return this.spec.partitions || 0;
+    return this.spec?.partitions || 0;
   }
 
   get replicas(): number {
-    return this.spec.replicas || 0;
+    return this.spec?.replicas || 0;
   }
 
   get readyStatus(): string {

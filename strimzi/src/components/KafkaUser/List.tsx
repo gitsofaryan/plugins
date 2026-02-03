@@ -1,4 +1,4 @@
-import { ActionButton, DeleteButton, ResourceListView, StatusLabel } from '@kinvolk/headlamp-plugin/lib/components/common';
+import { ActionButton, DeleteButton, Link, ResourceListView, StatusLabel } from '@kinvolk/headlamp-plugin/lib/components/common';
 import { Button } from '@mui/material';
 import React, { useState } from 'react';
 import { KafkaUser } from '../../resources/kafkaUser';
@@ -26,17 +26,36 @@ export function KafkaUserList() {
                 }}
                 resourceClass={KafkaUser}
                 columns={[
-                    'name',
-                    'namespace',
+                    {
+                        id: 'name',
+                        label: 'Name',
+                        getValue: (item: KafkaUser) => item.metadata.name,
+                        render: (item: KafkaUser) => (
+                            <Link
+                                routeName="/strimzi/users/:namespace/:name"
+                                params={{
+                                    namespace: item.metadata.namespace,
+                                    name: item.metadata.name,
+                                }}
+                            >
+                                {item.metadata.name}
+                            </Link>
+                        ),
+                    },
+                    {
+                        id: 'namespace',
+                        label: 'Namespace',
+                        getValue: (item: KafkaUser) => item.metadata.namespace,
+                    },
                     {
                         id: 'auth-type',
                         label: 'Auth Type',
-                        getValue: (item: any) => item.authType,
+                        getValue: (item: KafkaUser) => item.authType,
                     },
                     {
                         id: 'ready',
                         label: 'Ready',
-                        render: (item: any) => {
+                        render: (item: KafkaUser) => {
                             const status = item.readyStatus;
                             return (
                                 <StatusLabel status={status === 'True' ? 'success' : status === 'False' ? 'error' : 'warning'}>
@@ -45,11 +64,15 @@ export function KafkaUserList() {
                             );
                         },
                     },
-                    'age',
+                    {
+                        id: 'age',
+                        label: 'Age',
+                        getValue: (item: KafkaUser) => item.metadata.creationTimestamp,
+                    },
                     {
                         id: 'actions',
-                        label: '',
-                        render: (item: any) => <DeleteButton item={item} />,
+                        label: 'Actions',
+                        render: (item: KafkaUser) => <DeleteButton item={item} />,
                     },
                 ]}
             />

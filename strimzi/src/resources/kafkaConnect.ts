@@ -27,8 +27,13 @@ export default class KafkaConnect extends KubeObject {
     static apiVersion = 'kafka.strimzi.io/v1beta2';
     static isNamespaced = true;
 
-    spec: KafkaConnectSpec;
-    status: KafkaConnectStatus;
+    get spec() {
+        return this.jsonData.spec;
+    }
+
+    get status() {
+        return this.jsonData.status || {};
+    }
 
     static get listRoute() {
         return 'strimzi/connect/clusters';

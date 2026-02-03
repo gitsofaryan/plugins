@@ -1,37 +1,25 @@
-import { ResourceListView } from '@kinvolk/headlamp-plugin/lib/CommonComponents';
+import { ResourceListView, StatusLabel } from '@kinvolk/headlamp-plugin/lib/CommonComponents';
 import { Button } from '@mui/material';
 import KafkaConnector from '../../resources/kafkaConnector';
 import { Link } from '@kinvolk/headlamp-plugin/lib/CommonComponents';
 import { StrimziInstallCheck } from '../common/CommonComponents';
-import { useState } from 'react';
-import { CreateConnectorDialog } from './CreateDialog';
 
 export function KafkaConnectorList() {
-    const [openDialog, setOpenDialog] = useState(false);
-
     return (
         <StrimziInstallCheck>
             <ResourceListView
                 title="Kafka Connectors"
-                headerProps={{
-                    actions: [
-                        <Button
-                            key="create"
-                            color="primary"
-                            variant="contained"
-                            onClick={() => setOpenDialog(true)}
-                        >
-                            Create Connector
-                        </Button>
-                    ],
-                }}
                 resourceClass={KafkaConnector}
                 columns={[
                     {
                         id: 'name',
                         label: 'Name',
                         getValue: (item: any) => item.metadata.name,
-                        render: (item: any) => <Link routeName="details" params={{ name: item.metadata.name, namespace: item.metadata.namespace }}>{item.metadata.name}</Link>,
+                        render: (item: any) => (
+                            <Link routeName="/strimzi/connectors/:namespace/:name" params={{ name: item.metadata.name, namespace: item.metadata.namespace }}>
+                                {item.metadata.name}
+                            </Link>
+                        ),
                     },
                     {
                         id: 'namespace',
@@ -41,31 +29,31 @@ export function KafkaConnectorList() {
                     {
                         id: 'class',
                         label: 'Class',
-                        getValue: (item: any) => item.spec.class,
+                        getValue: (item: any) => item.spec?.class || 'N/A',
                     },
                     {
                         id: 'tasks',
                         label: 'Tasks Max',
-                        getValue: (item: any) => item.spec.tasksMax,
+                        getValue: (item: any) => item.spec?.tasksMax || 0,
                     },
                     {
                         id: 'state',
                         label: 'Status',
-                        getValue: (item: any) => item.status?.connectorStatus?.connector?.state || 'Unknown',
+                        render: (item: any) => {
+                            const state = item.status?.connectorStatus?.connector?.state || 'Unknown';
+                            return (
+                                <StatusLabel status={state === 'RUNNING' ? 'success' : state === 'FAILED' ? 'error' : 'warning'}>
+                                    {state}
+                                </StatusLabel>
+                            );
+                        },
                     },
                     {
                         id: 'created',
-                        label: 'Age',
+                        label: 'Created',
                         getValue: (item: any) => item.metadata.creationTimestamp,
                     },
                 ]}
-            />
-            <CreateConnectorDialog
-                open={openDialog}
-                onClose={() => setOpenDialog(false)}
-                onSuccess={() => {
-                    setOpenDialog(false);
-                }}
             />
         </StrimziInstallCheck>
     );

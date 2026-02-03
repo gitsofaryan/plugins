@@ -8,6 +8,12 @@ export interface KafkaUserSpec {
     type: 'simple';
     acls: any[];
   };
+  quotas?: {
+    producerByteRate?: number;
+    consumerByteRate?: number;
+    requestPercentage?: number;
+    controllerMutationRate?: number;
+  };
   template?: any;
 }
 
@@ -43,7 +49,7 @@ export class KafkaUser extends KubeObject<KafkaUserInterface> {
   }
 
   get authType(): string {
-    return this.spec.authentication?.type || 'none';
+    return this.spec?.authentication?.type || 'none';
   }
 
   get readyStatus(): string {

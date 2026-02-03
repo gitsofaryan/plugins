@@ -1,26 +1,24 @@
 import { ResourceListView } from '@kinvolk/headlamp-plugin/lib/CommonComponents';
-import { Button } from '@mui/material';
-import KafkaConnect from '../../resources/kafkaConnect';
+import KafkaMirrorMaker2 from '../../resources/kafkaMirrorMaker2';
 import { Link } from '@kinvolk/headlamp-plugin/lib/CommonComponents';
 import { StrimziInstallCheck } from '../common/CommonComponents';
 
-export function KafkaConnectList() {
+export function KafkaMirrorMaker2List() {
     return (
         <StrimziInstallCheck>
             <ResourceListView
-                title="Kafka Connect Clusters"
-                headerProps={{
-                    actions: [
-                        // Create button to be added later
-                    ],
-                }}
-                resourceClass={KafkaConnect}
+                title="Kafka MirrorMaker 2"
+                resourceClass={KafkaMirrorMaker2}
                 columns={[
                     {
                         id: 'name',
                         label: 'Name',
                         getValue: (item: any) => item.metadata.name,
-                        render: (item: any) => <Link routeName="details" params={{ name: item.metadata.name, namespace: item.metadata.namespace }}>{item.metadata.name}</Link>,
+                        render: (item: any) => (
+                            <Link routeName="/strimzi/mirrormaker2/:namespace/:name" params={{ name: item.metadata.name, namespace: item.metadata.namespace }}>
+                                {item.metadata.name}
+                            </Link>
+                        ),
                     },
                     {
                         id: 'namespace',
@@ -31,11 +29,6 @@ export function KafkaConnectList() {
                         id: 'replicas',
                         label: 'Replicas',
                         getValue: (item: any) => item.spec?.replicas || 0,
-                    },
-                    {
-                        id: 'version',
-                        label: 'Version',
-                        getValue: (item: any) => item.spec?.version || 'N/A',
                     },
                     {
                         id: 'created',
