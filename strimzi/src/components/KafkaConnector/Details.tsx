@@ -1,33 +1,16 @@
-import { ActionButton, MainInfoSection, SectionBox, SimpleTable } from '@kinvolk/headlamp-plugin/lib/CommonComponents';
+import { ActionButton, DetailsGrid, EditButton, SectionBox, SimpleTable, ViewButton } from '@kinvolk/headlamp-plugin/lib/components/common';
+import { K8s, registerDetailsViewSection } from '@kinvolk/headlamp-plugin/lib';
+import { HeadlampKubeObject } from '../../types/k8s';
+import React from 'react';
 import { useParams } from 'react-router-dom';
 import KafkaConnector from '../../resources/kafkaConnector';
-import { useEffect, useState } from 'react';
-import { Typography, Grid, Button } from '@mui/material';
+import { StrimziInstallCheck } from '../common/CommonComponents';
+import { Button } from '@mui/material';
 
 export function KafkaConnectorDetails() {
-    const { name, namespace } = useParams<{ name: string; namespace: string }>();
-    const [item, setItem] = useState<any>(null);
+    const { namespace, name } = useParams<{ namespace: string; name: string }>();
 
-    const refresh = () => {
-        if (name && namespace) {
-            // @ts-ignore
-            KafkaConnector.apiEndpoint.get(namespace, name).then(setItem).catch(console.error);
-        }
-    };
-
-    useEffect(() => {
-        refresh();
-        const interval = setInterval(refresh, 5000); // Auto refresh
-        return () => clearInterval(interval);
-    }, [name, namespace]);
-
-    if (!item) {
-        return <Typography>Loading...</Typography>;
-    }
-
-    const tasks = item.status?.connectorStatus?.tasks || [];
-
-    const restartConnector = async () => {
+    const restartConnector = async (item: any) => {
         try {
             await item.patch({
                 metadata: {
@@ -43,7 +26,7 @@ export function KafkaConnectorDetails() {
         }
     };
 
-    const restartTask = async (taskId: number) => {
+    const restartTask = async (item: any, taskId: number) => {
         try {
             await item.patch({
                 metadata: {
@@ -60,54 +43,134 @@ export function KafkaConnectorDetails() {
     };
 
     return (
-        <>
-            <Grid container justifyContent="space-between" alignItems="center">
-                <Grid item>
-                    <Typography variant="h4" gutterBottom>
-                        {item.metadata.name}
-                    </Typography>
-                </Grid>
-                <Grid item>
-                    <Button variant="contained" color="secondary" onClick={restartConnector}>
+        <StrimziInstallCheck>
+            <DetailsGrid
+                resourceType={KafkaConnector as any}
+                name={name}
+                namespace={namespace}
+                withEvents
+                actions={(item: any) => [
+                    {
+                        id: 'restart',
+                        action: (
+                            <Button variant="contained" color="secondary" size="small" onClick={() => restartConnector(item)}>
+                                Restart Connector
+                            </Button>
+                        ),
+                    },
+                    {
+                        id: 'edit',
+                        action: <EditButton item={item} />,
+                    },
+                    {
+                        id: 'view',
+                        action: <ViewButton item={item} />,
+                    },
+                ]}
+                extraInfo={(item: any) =>
+                    item && [
+                        {
+                            name: 'Class',
+                            value: item.spec?.class || 'N/A',
+                        },
+                        {
+                            name: 'Tasks Max',
+                            value: (item.spec?.tasksMax || 0).toString(),
+                        },
+                        {
+                            name: 'State',
+                            value: item.status?.connectorStatus?.connector?.state || 'Unknown',
+                        },
+                    ]
+                }
+                extraSections={(item: any) =>
+                    item && [
+                        {
+                            id: 'strimzi-connector-tasks',
+                            section: (
+                                <SectionBox title="Tasks">
+                                    <SimpleTable
+                                        columns={[
+                                            { label: 'ID', getter: (t: any) => t.id },
+                                            { label: 'State', getter: (t: any) => t.state },
+                                            { label: 'Worker', getter: (t: any) => t.worker_id },
+                                            {
+                                                label: 'Action',
+                                                getter: (t: any) => (
+                                                    <Button size="small" variant="outlined" onClick={() => restartTask(item, t.id)}>
+                                                        Restart Task
+                                                    </Button>
+                                                )
+                                            }
+                                        ]}
+                                        data={item.status?.connectorStatus?.tasks || []}
+                                    />
+                                </SectionBox>
+                            ),
+                        },
+                        {
+                            id: 'strimzi-connector-config',
+                            section: (
+                                <SectionBox title="Connector Configuration">
+                                    <pre style={{ overflow: 'auto' }}>
+                                        {JSON.stringify(item.spec?.config || {}, null, 2)}
+                                    </pre>
+                                </SectionBox>
+                            ),
+                        },
+                    ]
+                }
+            />
+        </StrimziInstallCheck>
+    );
+}
+
+export const registerKafkaConnectorDetails = () => {
+    registerDetailsViewSection(({ resource }: { resource: HeadlampKubeObject }) => {
+        if (resource.kind !== 'KafkaConnector') return null;
+
+        const item = resource as unknown as any; // Cast to any to access patch and custom fields
+
+        const restartConnector = async () => {
+            try {
+                await item.patch({
+                    metadata: {
+                        annotations: {
+                            'strimzi.io/restart-connector': 'true'
+                        }
+                    }
+                });
+                alert('Restarting connector...');
+            } catch (err) {
+                console.error(err);
+                alert('Failed to restart connector');
+            }
+        };
+
+        const restartTask = async (taskId: number) => {
+            try {
+                await item.patch({
+                    metadata: {
+                        annotations: {
+                            'strimzi.io/restart-task': taskId.toString()
+                        }
+                    }
+                });
+                alert(`Restarting task ${taskId}...`);
+            } catch (err) {
+                console.error(err);
+                alert(`Failed to restart task ${taskId}`);
+            }
+        };
+
+        return (
+            <>
+                <SectionBox title="Management">
+                    <Button variant="contained" color="secondary" size="small" onClick={restartConnector}>
                         Restart Connector
                     </Button>
-                </Grid>
-            </Grid>
-            <MainInfoSection resource={item} />
-            <SectionBox title="Spec">
-                <Grid container spacing={2}>
-                    <Grid item xs={12}>
-                        <Typography variant="subtitle2">Class</Typography>
-                        <Typography>{item.spec?.class || 'N/A'}</Typography>
-                    </Grid>
-                    <Grid item xs={6}>
-                        <Typography variant="subtitle2">Tasks Max</Typography>
-                        <Typography>{item.spec?.tasksMax || 0}</Typography>
-                    </Grid>
-                    <Grid item xs={12}>
-                        <Typography variant="subtitle2">Config</Typography>
-                        <pre style={{ backgroundColor: '#f5f5f5', padding: '10px' }}>
-                            {JSON.stringify(item.spec?.config || {}, null, 2)}
-                        </pre>
-                    </Grid>
-                </Grid>
-            </SectionBox>
-            <SectionBox title="Status">
-                <Grid container spacing={2}>
-                    <Grid item xs={6}>
-                        <Typography variant="subtitle2">Connector State</Typography>
-                        <Typography color={item.status?.connectorStatus?.connector?.state === 'RUNNING' ? 'success.main' : 'error.main'}>
-                            {item.status?.connectorStatus?.connector?.state || 'Unknown'}
-                        </Typography>
-                    </Grid>
-                    <Grid item xs={6}>
-                        <Typography variant="subtitle2">Worker ID</Typography>
-                        <Typography>{item.status?.connectorStatus?.connector?.worker_id || 'Unknown'}</Typography>
-                    </Grid>
-                </Grid>
-            </SectionBox>
-            <SectionBox title="Tasks">
-                {tasks.length > 0 ? (
+                </SectionBox>
+                <SectionBox title="Tasks">
                     <SimpleTable
                         columns={[
                             { label: 'ID', getter: (t: any) => t.id },
@@ -122,12 +185,15 @@ export function KafkaConnectorDetails() {
                                 )
                             }
                         ]}
-                        data={tasks}
+                        data={item.status?.connectorStatus?.tasks || []}
                     />
-                ) : (
-                    <Typography>No tasks found.</Typography>
-                )}
-            </SectionBox>
-        </>
-    );
-}
+                </SectionBox>
+                <SectionBox title="Connector Configuration">
+                    <pre style={{ overflow: 'auto' }}>
+                        {JSON.stringify(item.spec?.config || {}, null, 2)}
+                    </pre>
+                </SectionBox>
+            </>
+        );
+    });
+};

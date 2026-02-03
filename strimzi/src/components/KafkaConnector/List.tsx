@@ -16,7 +16,14 @@ export function KafkaConnectorList() {
                         label: 'Name',
                         getValue: (item: any) => item.metadata.name,
                         render: (item: any) => (
-                            <Link routeName="/strimzi/connectors/:namespace/:name" params={{ name: item.metadata.name, namespace: item.metadata.namespace }}>
+                            <Link
+                                routeName="customresource"
+                                params={{
+                                    crd: 'kafkaconnectors.kafka.strimzi.io',
+                                    namespace: item.metadata.namespace,
+                                    crName: item.metadata.name
+                                }}
+                            >
                                 {item.metadata.name}
                             </Link>
                         ),
@@ -53,7 +60,7 @@ export function KafkaConnectorList() {
                         label: 'Created',
                         getValue: (item: any) => item.metadata.creationTimestamp,
                     },
-                ]}
+                ] as any}
             />
         </StrimziInstallCheck>
     );

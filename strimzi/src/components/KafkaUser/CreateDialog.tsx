@@ -1,4 +1,5 @@
 import { ActionButton } from '@kinvolk/headlamp-plugin/lib/components/common';
+import { Utils } from '@kinvolk/headlamp-plugin/lib';
 import {
     Box,
     Button,
@@ -14,6 +15,7 @@ import {
     Typography,
 } from '@mui/material';
 import React, { useState } from 'react';
+import { useHistory } from 'react-router-dom';
 import { KafkaUser } from '../../resources/kafkaUser';
 
 interface CreateUserDialogProps {
@@ -23,6 +25,7 @@ interface CreateUserDialogProps {
 }
 
 export function CreateUserDialog({ open, onClose, onSuccess }: CreateUserDialogProps) {
+    const history = useHistory();
     const [name, setName] = useState('');
     const [namespace, setNamespace] = useState('default');
     const [authType, setAuthType] = useState('tls');
@@ -43,7 +46,7 @@ export function CreateUserDialog({ open, onClose, onSuccess }: CreateUserDialogP
                     name,
                     namespace,
                     labels: {
-                        'strimzi.io/cluster': 'my-cluster', // Placeholder
+                        'strimzi.io/cluster': 'my-cluster',
                     },
                 },
                 spec: {
@@ -56,6 +59,8 @@ export function CreateUserDialog({ open, onClose, onSuccess }: CreateUserDialogP
             await KafkaUser.apiEndpoint.post(user);
             onSuccess();
             onClose();
+            // Navigate to details using cluster-prefixed path to avoid 404
+            history.push(Utils.getClusterPrefixedPath(`/strimzi/users/${namespace}/${name}`));
         } catch (err: any) {
             console.error(err);
             setError(err.message || 'Failed to create user');

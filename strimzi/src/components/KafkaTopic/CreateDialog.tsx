@@ -1,4 +1,5 @@
 import { ActionButton } from '@kinvolk/headlamp-plugin/lib/components/common';
+import { Utils } from '@kinvolk/headlamp-plugin/lib';
 import {
     Box,
     Button,
@@ -10,6 +11,7 @@ import {
     Typography,
 } from '@mui/material';
 import React, { useState } from 'react';
+import { useHistory } from 'react-router-dom';
 import { KafkaTopic } from '../../resources/kafkaTopic';
 
 interface CreateTopicDialogProps {
@@ -19,6 +21,7 @@ interface CreateTopicDialogProps {
 }
 
 export function CreateTopicDialog({ open, onClose, onSuccess }: CreateTopicDialogProps) {
+    const history = useHistory();
     const [name, setName] = useState('');
     const [namespace, setNamespace] = useState('default');
     const [partitions, setPartitions] = useState(3);
@@ -40,7 +43,7 @@ export function CreateTopicDialog({ open, onClose, onSuccess }: CreateTopicDialo
                     name,
                     namespace,
                     labels: {
-                        'strimzi.io/cluster': 'my-cluster', // User might need to specify this? sticking to basic for now
+                        'strimzi.io/cluster': 'my-cluster',
                     },
                 },
                 spec: {
@@ -56,6 +59,8 @@ export function CreateTopicDialog({ open, onClose, onSuccess }: CreateTopicDialo
             await KafkaTopic.apiEndpoint.post(topic);
             onSuccess();
             onClose();
+            // Navigate to details using cluster-prefixed path to avoid 404
+            history.push(Utils.getClusterPrefixedPath(`/strimzi/topics/${namespace}/${name}`));
         } catch (err: any) {
             console.error(err);
             setError(err.message || 'Failed to create topic');

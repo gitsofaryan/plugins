@@ -5,24 +5,24 @@ import {
     registerSidebarEntry,
 } from '@kinvolk/headlamp-plugin/lib';
 import React from 'react';
-import { KafkaDetails } from './components/Kafka/Details';
+import { KafkaDetails, registerKafkaDetails } from './components/Kafka/Details';
 import { KafkaList } from './components/Kafka/List';
 import { KafkaConnectList } from './components/KafkaConnect/List';
-import { KafkaConnectDetails } from './components/KafkaConnect/Details';
+import { KafkaConnectDetails, registerKafkaConnectDetails } from './components/KafkaConnect/Details';
 import { KafkaConnectorList } from './components/KafkaConnector/List';
-import { KafkaConnectorDetails } from './components/KafkaConnector/Details';
-import { KafkaTopicDetails } from './components/KafkaTopic/Details';
+import { KafkaConnectorDetails, registerKafkaConnectorDetails } from './components/KafkaConnector/Details';
+import { KafkaTopicDetails, registerKafkaTopicDetails } from './components/KafkaTopic/Details';
 import { KafkaTopicList } from './components/KafkaTopic/List';
 import { KafkaUserList } from './components/KafkaUser/List';
-import { KafkaUserDetails } from './components/KafkaUser/Details';
+import { KafkaUserDetails, registerKafkaUserDetails } from './components/KafkaUser/Details';
 import { KafkaBridgeList } from './components/KafkaBridge/List';
-import { KafkaBridgeDetails } from './components/KafkaBridge/Details';
+import { KafkaBridgeDetails, registerKafkaBridgeDetails } from './components/KafkaBridge/Details';
 import { KafkaMirrorMaker2List } from './components/KafkaMirrorMaker2/List';
-import { KafkaMirrorMaker2Details } from './components/KafkaMirrorMaker2/Details';
+import { KafkaMirrorMaker2Details, registerKafkaMirrorMaker2Details } from './components/KafkaMirrorMaker2/Details';
 import { KafkaNodePoolList } from './components/KafkaNodePool/List';
-import { KafkaNodePoolDetails } from './components/KafkaNodePool/Details';
+import { KafkaNodePoolDetails, registerKafkaNodePoolDetails } from './components/KafkaNodePool/Details';
 import { KafkaRebalanceList } from './components/KafkaRebalance/List';
-import { KafkaRebalanceDetails } from './components/KafkaRebalance/Details';
+import { KafkaRebalanceDetails, registerKafkaRebalanceDetails } from './components/KafkaRebalance/Details';
 
 console.log('Strimzi Plugin: Registering sidebar entries...');
 // Main Strimzi sidebar entry
@@ -276,3 +276,14 @@ registerKindIcon('KafkaRebalance', {
     icon: <Icon icon='mdi:scale-balance' width='70%' height='70%' />,
     color: '#e38200',
 });
+
+console.log('Strimzi Plugin: Registering Details sections...');
+registerKafkaDetails();
+registerKafkaTopicDetails();
+registerKafkaUserDetails();
+registerKafkaConnectDetails();
+registerKafkaConnectorDetails();
+registerKafkaBridgeDetails();
+registerKafkaMirrorMaker2Details();
+registerKafkaNodePoolDetails();
+registerKafkaRebalanceDetails();

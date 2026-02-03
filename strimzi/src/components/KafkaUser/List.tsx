@@ -1,41 +1,44 @@
 import { ActionButton, DeleteButton, Link, ResourceListView, StatusLabel } from '@kinvolk/headlamp-plugin/lib/components/common';
 import { Button } from '@mui/material';
 import React, { useState } from 'react';
+import { useHistory } from 'react-router-dom';
 import { KafkaUser } from '../../resources/kafkaUser';
 import { StrimziInstallCheck } from '../common/CommonComponents';
 import { CreateUserDialog } from './CreateDialog';
 
 export function KafkaUserList() {
-    const [openDialog, setOpenDialog] = useState(false);
+    const history = useHistory();
+    const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false);
 
     return (
         <StrimziInstallCheck>
             <ResourceListView
                 title="Kafka Users"
+                resourceClass={KafkaUser}
                 headerProps={{
-                    actions: [
+                    titleSideActions: [
                         <Button
                             key="create"
                             color="primary"
                             variant="contained"
-                            onClick={() => setOpenDialog(true)}
+                            onClick={() => setIsCreateDialogOpen(true)}
                         >
                             Create User
-                        </Button>
+                        </Button>,
                     ],
                 }}
-                resourceClass={KafkaUser}
                 columns={[
                     {
                         id: 'name',
                         label: 'Name',
-                        getValue: (item: KafkaUser) => item.metadata.name,
-                        render: (item: KafkaUser) => (
+                        getValue: (item: any) => item.metadata.name,
+                        render: (item: any) => (
                             <Link
-                                routeName="/strimzi/users/:namespace/:name"
+                                routeName="customresource"
                                 params={{
+                                    crd: 'kafkausers.kafka.strimzi.io',
                                     namespace: item.metadata.namespace,
-                                    name: item.metadata.name,
+                                    crName: item.metadata.name
                                 }}
                             >
                                 {item.metadata.name}
@@ -45,17 +48,17 @@ export function KafkaUserList() {
                     {
                         id: 'namespace',
                         label: 'Namespace',
-                        getValue: (item: KafkaUser) => item.metadata.namespace,
+                        getValue: (item: any) => item.metadata.namespace,
                     },
                     {
-                        id: 'auth-type',
+                        id: 'auth',
                         label: 'Auth Type',
-                        getValue: (item: KafkaUser) => item.authType,
+                        getValue: (item: any) => item.spec?.authentication?.type || 'None',
                     },
                     {
                         id: 'ready',
                         label: 'Ready',
-                        render: (item: KafkaUser) => {
+                        render: (item: any) => {
                             const status = item.readyStatus;
                             return (
                                 <StatusLabel status={status === 'True' ? 'success' : status === 'False' ? 'error' : 'warning'}>
@@ -64,24 +67,18 @@ export function KafkaUserList() {
                             );
                         },
                     },
-                    {
-                        id: 'age',
-                        label: 'Age',
-                        getValue: (item: KafkaUser) => item.metadata.creationTimestamp,
-                    },
+                    'age',
                     {
                         id: 'actions',
-                        label: 'Actions',
-                        render: (item: KafkaUser) => <DeleteButton item={item} />,
+                        label: '',
+                        render: (item: any) => <DeleteButton item={item} />,
                     },
-                ]}
+                ] as any}
             />
             <CreateUserDialog
-                open={openDialog}
-                onClose={() => setOpenDialog(false)}
-                onSuccess={() => {
-                    setOpenDialog(false);
-                }}
+                open={isCreateDialogOpen}
+                onClose={() => setIsCreateDialogOpen(false)}
+                onSuccess={() => setIsCreateDialogOpen(false)}
             />
         </StrimziInstallCheck>
     );

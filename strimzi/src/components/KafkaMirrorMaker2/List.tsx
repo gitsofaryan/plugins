@@ -15,7 +15,14 @@ export function KafkaMirrorMaker2List() {
                         label: 'Name',
                         getValue: (item: any) => item.metadata.name,
                         render: (item: any) => (
-                            <Link routeName="/strimzi/mirrormaker2/:namespace/:name" params={{ name: item.metadata.name, namespace: item.metadata.namespace }}>
+                            <Link
+                                routeName="customresource"
+                                params={{
+                                    crd: 'kafkamirrormaker2s.kafka.strimzi.io',
+                                    namespace: item.metadata.namespace,
+                                    crName: item.metadata.name
+                                }}
+                            >
                                 {item.metadata.name}
                             </Link>
                         ),
@@ -35,7 +42,7 @@ export function KafkaMirrorMaker2List() {
                         label: 'Age',
                         getValue: (item: any) => item.metadata.creationTimestamp,
                     },
-                ]}
+                ] as any}
             />
         </StrimziInstallCheck>
     );

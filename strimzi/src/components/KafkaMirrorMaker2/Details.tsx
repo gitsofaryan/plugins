@@ -1,49 +1,78 @@
-import { MainInfoSection, SectionBox, SimpleTable } from '@kinvolk/headlamp-plugin/lib/CommonComponents';
+import { DetailsGrid, EditButton, SectionBox, SimpleTable, ViewButton } from '@kinvolk/headlamp-plugin/lib/components/common';
+import { K8s, registerDetailsViewSection } from '@kinvolk/headlamp-plugin/lib';
+import { HeadlampKubeObject } from '../../types/k8s';
+import React from 'react';
 import { useParams } from 'react-router-dom';
 import KafkaMirrorMaker2 from '../../resources/kafkaMirrorMaker2';
-import { useEffect, useState } from 'react';
-import { Typography, Grid } from '@mui/material';
+import { StrimziInstallCheck } from '../common/CommonComponents';
 
 export function KafkaMirrorMaker2Details() {
-    const { name, namespace } = useParams<{ name: string; namespace: string }>();
-    const [item, setItem] = useState<any>(null);
-
-    useEffect(() => {
-        if (name && namespace) {
-            // @ts-ignore
-            KafkaMirrorMaker2.apiEndpoint.get(namespace, name).then(setItem).catch(console.error);
-        }
-    }, [name, namespace]);
-
-    if (!item) {
-        return <Typography>Loading...</Typography>;
-    }
-
-    const clusters = item.spec?.clusters || [];
+    const { namespace, name } = useParams<{ namespace: string; name: string }>();
 
     return (
-        <>
-            <Typography variant="h4" gutterBottom>
-                MirrorMaker 2: {item.metadata.name}
-            </Typography>
-            <MainInfoSection resource={item} />
+        <StrimziInstallCheck>
+            <DetailsGrid
+                resourceType={KafkaMirrorMaker2 as any}
+                name={name}
+                namespace={namespace}
+                withEvents
+                actions={(item: any) => [
+                    {
+                        id: 'edit',
+                        action: <EditButton item={item} />,
+                    },
+                    {
+                        id: 'view',
+                        action: <ViewButton item={item} />,
+                    },
+                ]}
+                extraInfo={(item: any) =>
+                    item && [
+                        {
+                            name: 'Ready Replicas',
+                            value: (item.status?.replicas || 0).toString(),
+                        },
+                    ]
+                }
+                extraSections={(item: any) =>
+                    item && [
+                        {
+                            id: 'strimzi-mm2-clusters',
+                            section: (
+                                <SectionBox title="Clusters">
+                                    <SimpleTable
+                                        columns={[
+                                            { label: 'Alias', getter: (c: any) => c.alias },
+                                            { label: 'Bootstrap Servers', getter: (c: any) => c.bootstrapServers }
+                                        ]}
+                                        data={item.spec?.clusters || []}
+                                    />
+                                </SectionBox>
+                            ),
+                        },
+                    ]
+                }
+            />
+        </StrimziInstallCheck>
+    );
+}
+
+export const registerKafkaMirrorMaker2Details = () => {
+    registerDetailsViewSection(({ resource }: { resource: HeadlampKubeObject }) => {
+        if (resource.kind !== 'KafkaMirrorMaker2') return null;
+
+        const item = resource as unknown as KafkaMirrorMaker2;
+
+        return (
             <SectionBox title="Clusters">
                 <SimpleTable
                     columns={[
                         { label: 'Alias', getter: (c: any) => c.alias },
                         { label: 'Bootstrap Servers', getter: (c: any) => c.bootstrapServers }
                     ]}
-                    data={clusters}
+                    data={item.spec?.clusters || []}
                 />
             </SectionBox>
-            <SectionBox title="Status">
-                <Grid container spacing={2}>
-                    <Grid item xs={12}>
-                        <Typography variant="subtitle2">Ready Replicas</Typography>
-                        <Typography>{item.status?.replicas || 0}</Typography>
-                    </Grid>
-                </Grid>
-            </SectionBox>
-        </>
-    );
-}
+        );
+    });
+};

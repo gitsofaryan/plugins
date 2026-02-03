@@ -15,7 +15,14 @@ export function KafkaList() {
                         label: 'Name',
                         getValue: (item: any) => item.metadata.name,
                         render: (item: any) => (
-                            <Link routeName="/strimzi/clusters/:namespace/:name" params={{ namespace: item.metadata.namespace, name: item.metadata.name }}>
+                            <Link
+                                routeName="customresource"
+                                params={{
+                                    crd: 'kafkas.kafka.strimzi.io',
+                                    namespace: item.metadata.namespace,
+                                    crName: item.metadata.name
+                                }}
+                            >
                                 {item.metadata.name}
                             </Link>
                         ),
@@ -48,7 +55,7 @@ export function KafkaList() {
                         },
                     },
                     'age',
-                ]}
+                ] as any}
             />
         </StrimziInstallCheck>
     );

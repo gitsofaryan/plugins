@@ -15,7 +15,14 @@ export function KafkaRebalanceList() {
                         label: 'Name',
                         getValue: (item: any) => item.metadata.name,
                         render: (item: any) => (
-                            <Link routeName="/strimzi/rebalances/:namespace/:name" params={{ name: item.metadata.name, namespace: item.metadata.namespace }}>
+                            <Link
+                                routeName="customresource"
+                                params={{
+                                    crd: 'kafkarebalances.kafka.strimzi.io',
+                                    namespace: item.metadata.namespace,
+                                    crName: item.metadata.name
+                                }}
+                            >
                                 {item.metadata.name}
                             </Link>
                         ),

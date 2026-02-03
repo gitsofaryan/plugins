@@ -1,4 +1,6 @@
-import { DetailsGrid, SectionBox } from '@kinvolk/headlamp-plugin/lib/components/common';
+import { DetailsGrid, EditButton, SectionBox, ViewButton } from '@kinvolk/headlamp-plugin/lib/components/common';
+import { K8s, registerDetailsViewSection } from '@kinvolk/headlamp-plugin/lib';
+import { HeadlampKubeObject } from '../../types/k8s';
 import React from 'react';
 import { useParams } from 'react-router-dom';
 import { KafkaTopic } from '../../resources/kafkaTopic';
@@ -14,6 +16,16 @@ export function KafkaTopicDetails() {
                 name={name}
                 namespace={namespace}
                 withEvents
+                actions={(item: KafkaTopic) => [
+                    {
+                        id: 'edit',
+                        action: <EditButton item={item} />,
+                    },
+                    {
+                        id: 'view',
+                        action: <ViewButton item={item} />,
+                    },
+                ]}
                 extraInfo={(item: KafkaTopic) =>
                     item && [
                         {
@@ -36,7 +48,9 @@ export function KafkaTopicDetails() {
                             id: 'strimzi-spec',
                             section: (
                                 <SectionBox title="Topic Configuration">
-                                    <pre>{JSON.stringify(item.spec?.config || {}, null, 2)}</pre>
+                                    <pre style={{ overflow: 'auto' }}>
+                                        {JSON.stringify(item.spec?.config || {}, null, 2)}
+                                    </pre>
                                 </SectionBox>
                             ),
                         },
@@ -46,3 +60,19 @@ export function KafkaTopicDetails() {
         </StrimziInstallCheck>
     );
 }
+
+export const registerKafkaTopicDetails = () => {
+    registerDetailsViewSection(({ resource }: { resource: HeadlampKubeObject }) => {
+        if (resource.kind !== 'KafkaTopic') return null;
+
+        const item = resource as unknown as KafkaTopic;
+
+        return (
+            <SectionBox title="Topic Configuration">
+                <pre style={{ overflow: 'auto' }}>
+                    {JSON.stringify(item.spec?.config || {}, null, 2)}
+                </pre>
+            </SectionBox>
+        );
+    });
+};

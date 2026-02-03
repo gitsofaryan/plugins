@@ -16,8 +16,12 @@ export function KafkaBridgeList() {
                         getValue: (item: any) => item.metadata.name,
                         render: (item: any) => (
                             <Link
-                                routeName="/strimzi/bridges/:namespace/:name"
-                                params={{ name: item.metadata.name, namespace: item.metadata.namespace }}
+                                routeName="customresource"
+                                params={{
+                                    crd: 'kafkabridges.kafka.strimzi.io',
+                                    namespace: item.metadata.namespace,
+                                    crName: item.metadata.name
+                                }}
                             >
                                 {item.metadata.name}
                             </Link>
@@ -48,7 +52,7 @@ export function KafkaBridgeList() {
                         label: 'Age',
                         getValue: (item: any) => item.metadata.creationTimestamp,
                     },
-                ]}
+                ] as any}
             />
         </StrimziInstallCheck>
     );

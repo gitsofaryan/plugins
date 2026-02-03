@@ -20,7 +20,18 @@ export function KafkaConnectList() {
                         id: 'name',
                         label: 'Name',
                         getValue: (item: any) => item.metadata.name,
-                        render: (item: any) => <Link routeName="details" params={{ name: item.metadata.name, namespace: item.metadata.namespace }}>{item.metadata.name}</Link>,
+                        render: (item: any) => (
+                            <Link
+                                routeName="customresource"
+                                params={{
+                                    crd: 'kafkaconnects.kafka.strimzi.io',
+                                    namespace: item.metadata.namespace,
+                                    crName: item.metadata.name
+                                }}
+                            >
+                                {item.metadata.name}
+                            </Link>
+                        ),
                     },
                     {
                         id: 'namespace',
@@ -42,7 +53,7 @@ export function KafkaConnectList() {
                         label: 'Age',
                         getValue: (item: any) => item.metadata.creationTimestamp,
                     },
-                ]}
+                ] as any}
             />
         </StrimziInstallCheck>
     );

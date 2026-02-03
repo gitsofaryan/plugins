@@ -1,58 +1,74 @@
-import { MainInfoSection, SectionBox } from '@kinvolk/headlamp-plugin/lib/CommonComponents';
+import { DetailsGrid, EditButton, SectionBox, ViewButton } from '@kinvolk/headlamp-plugin/lib/components/common';
+import { K8s, registerDetailsViewSection } from '@kinvolk/headlamp-plugin/lib';
+import { HeadlampKubeObject } from '../../types/k8s';
+import React from 'react';
 import { useParams } from 'react-router-dom';
 import KafkaBridge from '../../resources/kafkaBridge';
-import { useEffect, useState } from 'react';
-import { Typography, Grid } from '@mui/material';
+import { StrimziInstallCheck } from '../common/CommonComponents';
 
 export function KafkaBridgeDetails() {
-    const { name, namespace } = useParams<{ name: string; namespace: string }>();
-    const [item, setItem] = useState<any>(null);
-
-    useEffect(() => {
-        if (name && namespace) {
-            // @ts-ignore
-            KafkaBridge.apiEndpoint.get(namespace, name).then(setItem).catch(console.error);
-        }
-    }, [name, namespace]);
-
-    if (!item) {
-        return <Typography>Loading...</Typography>;
-    }
+    const { namespace, name } = useParams<{ namespace: string; name: string }>();
 
     return (
-        <>
-            <Typography variant="h4" gutterBottom>
-                {item.metadata.name}
-            </Typography>
-            <MainInfoSection resource={item} />
-            <SectionBox title="Spec">
-                <Grid container spacing={2}>
-                    <Grid item xs={6}>
-                        <Typography variant="subtitle2">Replicas</Typography>
-                        <Typography>{item.spec?.replicas || 0}</Typography>
-                    </Grid>
-                    <Grid item xs={6}>
-                        <Typography variant="subtitle2">HTTP Port</Typography>
-                        <Typography>{item.spec?.http?.port || 'N/A'}</Typography>
-                    </Grid>
-                    <Grid item xs={12}>
-                        <Typography variant="subtitle2">Bootstrap Servers</Typography>
-                        <Typography>{item.spec?.bootstrapServers || 'N/A'}</Typography>
-                    </Grid>
-                    <Grid item xs={12}>
-                        <Typography variant="subtitle2">Image</Typography>
-                        <Typography>{item.spec?.image || 'Default'}</Typography>
-                    </Grid>
-                </Grid>
-            </SectionBox>
-            <SectionBox title="Status">
-                <Grid container spacing={2}>
-                    <Grid item xs={12}>
-                        <Typography variant="subtitle2">URL</Typography>
-                        <Typography>{item.status?.url || 'N/A'}</Typography>
-                    </Grid>
-                </Grid>
-            </SectionBox>
-        </>
+        <StrimziInstallCheck>
+            <DetailsGrid
+                resourceType={KafkaBridge as any}
+                name={name}
+                namespace={namespace}
+                withEvents
+                actions={(item: any) => [
+                    {
+                        id: 'edit',
+                        action: <EditButton item={item} />,
+                    },
+                    {
+                        id: 'view',
+                        action: <ViewButton item={item} />,
+                    },
+                ]}
+                extraInfo={(item: any) =>
+                    item && [
+                        {
+                            name: 'Replicas',
+                            value: (item.spec?.replicas || 0).toString(),
+                        },
+                        {
+                            name: 'Port',
+                            value: (item.spec?.http?.port || 'N/A').toString(),
+                        },
+                    ]
+                }
+                extraSections={(item: any) =>
+                    item && [
+                        {
+                            id: 'strimzi-bridge-spec',
+                            section: (
+                                <SectionBox title="Bridge Configuration">
+                                    <pre style={{ overflow: 'auto' }}>
+                                        {JSON.stringify(item.spec || {}, null, 2)}
+                                    </pre>
+                                </SectionBox>
+                            ),
+                        },
+                    ]
+                }
+            />
+        </StrimziInstallCheck>
     );
 }
+
+export const registerKafkaBridgeDetails = () => {
+    registerDetailsViewSection(({ resource }: { resource: HeadlampKubeObject }) => {
+        if (resource.kind !== 'KafkaBridge') return null;
+
+        const item = resource as unknown as KafkaBridge;
+
+        return (
+            <SectionBox title="Bridge Configuration">
+                <pre style={{ overflow: 'auto' }}>
+                    {JSON.stringify(item.spec || {}, null, 2)}
+                </pre>
+            </SectionBox>
+        );
+    });
+};

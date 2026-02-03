@@ -1,37 +1,46 @@
 import { ActionButton, DeleteButton, Link, ResourceListView, StatusLabel } from '@kinvolk/headlamp-plugin/lib/components/common';
 import { Button } from '@mui/material';
 import React, { useState } from 'react';
+import { useHistory } from 'react-router-dom';
 import { KafkaTopic } from '../../resources/kafkaTopic';
 import { StrimziInstallCheck } from '../common/CommonComponents';
 import { CreateTopicDialog } from './CreateDialog';
 
 export function KafkaTopicList() {
-    const [openDialog, setOpenDialog] = useState(false);
+    const history = useHistory();
+    const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false);
 
     return (
         <StrimziInstallCheck>
             <ResourceListView
                 title="Kafka Topics"
+                resourceClass={KafkaTopic}
                 headerProps={{
-                    actions: [
+                    titleSideActions: [
                         <Button
                             key="create"
                             color="primary"
                             variant="contained"
-                            onClick={() => setOpenDialog(true)}
+                            onClick={() => setIsCreateDialogOpen(true)}
                         >
                             Create Topic
-                        </Button>
+                        </Button>,
                     ],
                 }}
-                resourceClass={KafkaTopic}
                 columns={[
                     {
                         id: 'name',
                         label: 'Name',
                         getValue: (item: any) => item.metadata.name,
                         render: (item: any) => (
-                            <Link routeName="/strimzi/topics/:namespace/:name" params={{ namespace: item.metadata.namespace, name: item.metadata.name }}>
+                            <Link
+                                routeName="customresource"
+                                params={{
+                                    crd: 'kafkatopics.kafka.strimzi.io',
+                                    namespace: item.metadata.namespace,
+                                    crName: item.metadata.name
+                                }}
+                            >
                                 {item.metadata.name}
                             </Link>
                         ),
@@ -69,15 +78,12 @@ export function KafkaTopicList() {
                         label: '',
                         render: (item: any) => <DeleteButton item={item} />,
                     },
-                ]}
+                ] as any}
             />
             <CreateTopicDialog
-                open={openDialog}
-                onClose={() => setOpenDialog(false)}
-                onSuccess={() => {
-                    setOpenDialog(false);
-                    // ResourceListView should pick up changes automatically via websocket/watch
-                }}
+                open={isCreateDialogOpen}
+                onClose={() => setIsCreateDialogOpen(false)}
+                onSuccess={() => setIsCreateDialogOpen(false)}
             />
         </StrimziInstallCheck>
     );
